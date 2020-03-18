@@ -34,8 +34,8 @@ import difflib
 
 import requests
 
-from .handler import JobState
-from .jobs import NotModifiedError
+from handler import JobState
+from jobs import NotModifiedError
 
 logger = logging.getLogger(__name__)
 

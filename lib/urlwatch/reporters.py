@@ -43,10 +43,10 @@ import functools
 
 import requests
 
-import urlwatch
-from .mailer import SMTPMailer
-from .mailer import SendmailMailer
-from .util import TrackSubClasses
+import __init__ as urlwatch
+from mailer import SMTPMailer
+from mailer import SendmailMailer
+from util import TrackSubClasses
 
 try:
     import chump

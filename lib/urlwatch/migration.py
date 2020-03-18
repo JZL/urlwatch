@@ -32,8 +32,8 @@ import logging
 import os.path
 import sys
 
-from .util import atomic_rename
-from .storage import UrlsYaml, UrlsTxt, CacheDirStorage
+from util import atomic_rename
+from storage import UrlsYaml, UrlsTxt, CacheDirStorage
 
 logger = logging.getLogger(__name__)
 

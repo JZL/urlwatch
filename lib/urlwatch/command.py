@@ -35,12 +35,12 @@ import shutil
 import sys
 import requests
 
-from .filters import FilterBase
-from .handler import JobState
-from .jobs import JobBase, UrlJob
-from .reporters import ReporterBase
-from .util import atomic_rename, edit_file
-from .mailer import set_password, have_password
+from filters import FilterBase
+from handler import JobState
+from jobs import JobBase, UrlJob
+from reporters import ReporterBase
+from util import atomic_rename, edit_file
+from mailer import set_password, have_password
 
 logger = logging.getLogger(__name__)
 

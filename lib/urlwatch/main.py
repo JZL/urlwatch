@@ -32,8 +32,8 @@ import imp
 import logging
 import os
 
-from .handler import Report
-from .worker import run_jobs
+from handler import Report
+from worker import run_jobs
 
 logger = logging.getLogger(__name__)
 

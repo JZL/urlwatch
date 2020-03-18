@@ -32,8 +32,8 @@ import argparse
 import logging
 import os
 
-import urlwatch
-from .migration import migrate_cache, migrate_urls
+import __init__ as urlwatch
+from migration import migrate_cache, migrate_urls
 
 logger = logging.getLogger(__name__)
 

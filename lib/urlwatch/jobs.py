@@ -36,10 +36,10 @@ import re
 import subprocess
 import requests
 import textwrap
-import urlwatch
+import __init__ as urlwatch
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
-from .util import TrackSubClasses
+from util import TrackSubClasses
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 

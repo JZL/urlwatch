@@ -33,9 +33,9 @@ import logging
 import time
 import traceback
 
-from .filters import FilterBase
-from .jobs import NotModifiedError
-from .reporters import ReporterBase
+from filters import FilterBase
+from jobs import NotModifiedError
+from reporters import ReporterBase
 
 logger = logging.getLogger(__name__)
 

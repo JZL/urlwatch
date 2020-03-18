@@ -39,8 +39,8 @@ import yaml
 import minidb
 import logging
 
-from .util import atomic_rename, edit_file
-from .jobs import JobBase, UrlJob, ShellJob
+from util import atomic_rename, edit_file
+from jobs import JobBase, UrlJob, ShellJob
 
 logger = logging.getLogger(__name__)
 

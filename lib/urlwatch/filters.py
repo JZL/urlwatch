@@ -41,7 +41,7 @@ from enum import Enum
 from lxml import etree
 from lxml.cssselect import CSSSelector
 
-from .util import TrackSubClasses
+from util import TrackSubClasses
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ class Html2TextFilter(FilterBase):
         elif isinstance(subfilter, str):
             method = subfilter
             options = {}
-        from .html2txt import html2text
+        from html2txt import html2text
         return html2text(data, method=method, options=options)
 
 
@@ -182,7 +182,7 @@ class Ical2TextFilter(FilterBase):
 
     def filter(self, data, subfilter=None):
         self._no_subfilters(subfilter)
-        from .ical2txt import ical2text
+        from ical2txt import ical2text
         return ical2text(data)
 
 

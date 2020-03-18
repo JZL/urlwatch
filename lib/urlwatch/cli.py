@@ -51,10 +51,10 @@ if not os.path.exists(urlwatch_dir):
 if bindir != 'bin':
     sys.path.insert(0, os.path.join(prefix, bindir, 'lib'))
 
-from urlwatch.command import UrlwatchCommand
-from urlwatch.config import CommandConfig
-from urlwatch.main import Urlwatch
-from urlwatch.storage import YamlConfigStorage, CacheMiniDBStorage, UrlsYaml
+from command import UrlwatchCommand
+from config import CommandConfig
+from main import Urlwatch
+from storage import YamlConfigStorage, CacheMiniDBStorage, UrlsYaml
 
 # One minute (=60 seconds) timeout for each request to avoid hanging
 socket.setdefaulttimeout(60)
