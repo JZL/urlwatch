@@ -172,7 +172,8 @@ class Html2TextFilter(FilterBase):
             method = subfilter
             options = {}
         from html2txt import html2text
-        return html2text(data, method=method, options=options)
+        # Jonah changed, lynx is way better and more accuratte
+        return html2text(data, method="lynx", options=options)
 
 
 class Ical2TextFilter(FilterBase):

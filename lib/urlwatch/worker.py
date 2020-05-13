@@ -50,6 +50,14 @@ def run_parallel(func, items):
             raise exception
         yield future.result()
 
+    # If want sequential
+    # for j in items:
+    #     try:
+    #         yield j.process()
+    #     except Exception as e:
+    #         raise e
+
+
 
 def run_jobs(urlwatcher):
     cache_storage = urlwatcher.cache_storage
