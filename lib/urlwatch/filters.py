@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of urlwatch (https://thp.io/2008/urlwatch/).
-# Copyright (c) 2008-2019 Thomas Perl <m@thp.io>
+# Copyright (c) 2008-2020 Thomas Perl <m@thp.io>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,11 @@ class FilterBase(object, metaclass=TrackSubClasses):
             raise ValueError('Unknown filter kind: %s:%s' % (filter_kind, subfilter))
         return filtercls(state.job, state).filter(data, subfilter)
 
+    @classmethod
+    def is_bytes_filter(cls, filter):
+        return (filter in [name for name, class_ in FilterBase.__subclasses__.items()
+                           if getattr(class_, '__uses_bytes__', False)])
+
     def match(self):
         return False
 
@@ -155,6 +160,29 @@ class LegacyHooksPyFilter(FilterBase):
             return data
 
 
+class BeautifyFilter(FilterBase):
+    """Beautify HTML"""
+
+    __kind__ = 'beautify'
+
+    def filter(self, data, subfilter=None):
+        import jsbeautifier
+        import cssbeautifier
+        from bs4 import BeautifulSoup as bs
+        soup = bs(data, features="lxml")
+        scripts = soup.find_all('script')
+        for script in scripts:
+            if script.string is not None:
+                beautified_js = jsbeautifier.beautify(script.string)
+                script.string = beautified_js
+        styles = soup.find_all('style')
+        for style in styles:
+            if style.string is not None:
+                beautified_css = cssbeautifier.beautify(style.string)
+                style.string = beautified_css
+        return soup.prettify()
+
+
 class Html2TextFilter(FilterBase):
     """Convert HTML to plaintext"""
 
@@ -174,6 +202,30 @@ class Html2TextFilter(FilterBase):
         from html2txt import html2text
         # Jonah changed, lynx is way better and more accuratte
         return html2text(data, method="lynx", options=options)
+
+
+class Pdf2TextFilter(FilterBase):
+    """Convert PDF to plaintext"""
+    # Requires data to be in bytes (not unicode)
+    # Dependency: pdftotext (https://github.com/jalan/pdftotext), itself based
+    # on poppler (https://poppler.freedesktop.org/)
+    # Note: check pdftotext website for OS-specific dependencies for install
+
+    __kind__ = 'pdf2text'
+    __uses_bytes__ = True
+
+    def filter(self, data, subfilter=None):
+        # data must be bytes
+        if not isinstance(data, bytes):
+            raise ValueError('The pdf2text filter needs bytes input (is it the first filter?)')
+
+        if subfilter is None:
+            password = ''
+        elif isinstance(subfilter, dict):
+            password = subfilter['password']
+        import pdftotext
+        import io
+        return '\n\n'.join(pdftotext.PDF(io.BytesIO(data), password=password))
 
 
 class Ical2TextFilter(FilterBase):
@@ -538,3 +590,18 @@ class RegexSub(FilterBase):
 
         # Default: Replace with empty string if no "repl" value is set
         return re.sub(subfilter.get('pattern'), subfilter.get('repl', ''), data)
+
+
+class SortFilter(FilterBase):
+    """Sort the results before comparison"""
+
+    __kind__ = 'sort'
+
+    def filter(self, data, subfilter=None):
+        reverse = ((isinstance(subfilter, dict) and subfilter.get('reverse', False) is True)
+                   or (isinstance(subfilter, str) and subfilter == 'reverse'))
+
+        data_list = data.splitlines()
+        data_list = sorted(data_list, key=str.casefold, reverse=reverse)
+
+        return '\n'.join(data_list)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of urlwatch (https://thp.io/2008/urlwatch/).
-# Copyright (c) 2008-2019 Thomas Perl <m@thp.io>
+# Copyright (c) 2008-2020 Thomas Perl <m@thp.io>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,12 @@ DEFAULT_CONFIG = {
             'minimal': False,
         },
 
+        'markdown': {
+            'details': True,
+            'footer': True,
+            'minimal': False,
+        },
+
         'html': {
             'diff': 'unified',  # "unified" or "table"
         },
@@ -106,6 +112,12 @@ DEFAULT_CONFIG = {
         'slack': {
             'enabled': False,
             'webhook_url': '',
+        },
+        'matrix': {
+            'enabled': False,
+            'homeserver': '',
+            'access_token': '',
+            'room_id': '',
         },
         'mailgun': {
             'enabled': False,
@@ -308,7 +320,8 @@ class UrlsYaml(BaseYamlFileStorage, UrlsBaseFileStorage):
         filename = args[0]
         if filename is not None and os.path.exists(filename):
             with open(filename) as fp:
-                return [JobBase.unserialize(job) for job in yaml.load_all(fp, Loader=yaml.SafeLoader) if job is not None]
+                return [JobBase.unserialize(job) for job in yaml.load_all(fp, Loader=yaml.SafeLoader)
+                        if job is not None]
 
     def save(self, *args):
         jobs = args[0]
@@ -451,8 +464,11 @@ class CacheMiniDBStorage(CacheStorage):
         return (guid for guid, in CacheEntry.query(self.db, minidb.Function('distinct', CacheEntry.c.guid)))
 
     def load(self, job, guid):
-        for data, timestamp, tries, etag in CacheEntry.query(self.db, CacheEntry.c.data // CacheEntry.c.timestamp // CacheEntry.c.tries // CacheEntry.c.etag,
-                                                             order_by=minidb.columns(CacheEntry.c.timestamp.desc, CacheEntry.c.tries.desc),
+        for data, timestamp, tries, etag in CacheEntry.query(self.db,
+                                                             CacheEntry.c.data // CacheEntry.c.timestamp
+                                                             // CacheEntry.c.tries // CacheEntry.c.etag,
+                                                             order_by=minidb.columns(CacheEntry.c.timestamp.desc,
+                                                                                     CacheEntry.c.tries.desc),
                                                              where=CacheEntry.c.guid == guid, limit=1):
             return data, timestamp, tries, etag
 
@@ -463,9 +479,10 @@ class CacheMiniDBStorage(CacheStorage):
         if count < 1:
             return history
         for data, timestamp in CacheEntry.query(self.db, CacheEntry.c.data // CacheEntry.c.timestamp,
-                                                order_by=minidb.columns(CacheEntry.c.timestamp.desc, CacheEntry.c.tries.desc),
+                                                order_by=minidb.columns(CacheEntry.c.timestamp.desc,
+                                                                        CacheEntry.c.tries.desc),
                                                 where=(CacheEntry.c.guid == guid)
-                                                & ((CacheEntry.c.tries == 0) | (CacheEntry.c.tries == None))):  # noqa
+                                                & ((CacheEntry.c.tries == 0) | (CacheEntry.c.tries == None))):  # noqa:E711
             if data not in history:
                 history[data] = timestamp
                 if len(history) >= count:

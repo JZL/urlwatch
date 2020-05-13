@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of urlwatch (https://thp.io/2008/urlwatch/).
-# Copyright (c) 2008-2019 Thomas Perl <m@thp.io>
+# Copyright (c) 2008-2020 Thomas Perl <m@thp.io>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 import logging
 import os.path
 import signal
-import socket
 import sys
 
 from appdirs import AppDirs
@@ -55,9 +54,6 @@ from command import UrlwatchCommand
 from config import CommandConfig
 from main import Urlwatch
 from storage import YamlConfigStorage, CacheMiniDBStorage, UrlsYaml
-
-# One minute (=60 seconds) timeout for each request to avoid hanging
-socket.setdefaulttimeout(60)
 
 # Ignore SIGPIPE for stdout (see https://github.com/thp/urlwatch/issues/77)
 try:

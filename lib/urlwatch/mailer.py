@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of urlwatch (https://thp.io/2008/urlwatch/).
-# Copyright (c) 2008-2019 Thomas Perl <m@thp.io>
+# Copyright (c) 2008-2020 Thomas Perl <m@thp.io>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,8 @@ class SMTPMailer(Mailer):
             elif keyring is not None:
                 passwd = keyring.get_password(self.smtp_server, self.smtp_user)
                 if passwd is None:
-                    raise ValueError('No password available in keyring for {}, {}'.format(self.smtp_server, self.smtp_user))
+                    raise ValueError('No password available in keyring for {}, {}'
+                                     .format(self.smtp_server, self.smtp_user))
             s.login(self.smtp_user, passwd)
 
         s.sendmail(msg['From'], msg['To'].split(','), msg.as_string())
