@@ -193,9 +193,9 @@ class JsonFormatFilter(FilterBase):
 
     def filter(self, data, subfilter=None):
         indentation = 4
-        if subfilter is not None:
-            indentation = int(subfilter)
         parsed_json = json.loads(data)
+        if subfilter is not None:
+            parsed_json = eval("parsed_json"+subfilter)
         return json.dumps(parsed_json, ensure_ascii=False, sort_keys=True, indent=indentation, separators=(',', ': '))
 
 
@@ -212,6 +212,16 @@ class GrepFilter(FilterBase):
                          if re.search(subfilter, line) is not None)
 
 
+class LinesGrepFilter(FilterBase):
+    """Filter only lines matching a regular expression"""
+
+    __kind__ = 'linesgrep'
+
+    def filter(self, data, subfilter=None):
+        if subfilter is None:
+            raise ValueError('The grep filter needs a regular expression')
+
+        return '\n'.join(re.findall(re.compile(subfilter), data))
 class InverseGrepFilter(FilterBase):
     """Filter which removes lines matching a regular expression"""
 
