@@ -201,7 +201,8 @@ class Html2TextFilter(FilterBase):
             options = {}
         from html2txt import html2text
         # Jonah changed, lynx is way better and more accuratte
-        return html2text(data, method="lynx", options=options)
+        return html2text(data, baseurl=getattr(self.job, 'url', getattr(self.job, 'navigate', '')),
+                method="lynx", options=options)
 
 
 class Pdf2TextFilter(FilterBase):
