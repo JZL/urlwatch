@@ -461,6 +461,17 @@ class GrepFilter(FilterBase):
                          if re.search(subfilter['re'], line) is not None)
 
 
+class LinesGrepFilter(FilterBase):
+    """Filter only lines matching a regular expression"""
+
+    __kind__ = 'linesgrep'
+
+    def filter(self, data, subfilter=None):
+        if subfilter is None:
+            raise ValueError('The grep filter needs a regular expression')
+
+        return '\n'.join(re.findall(re.compile(subfilter), data))
+
 class InverseGrepFilter(FilterBase):
     """Remove lines matching a regular expression"""
 
