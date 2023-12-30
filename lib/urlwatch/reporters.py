@@ -380,7 +380,10 @@ class StdoutReporter(TextReporter):
         return print
 
     def submit(self):
+        body_html = '\n'.join(self.convert(HtmlReporter).submit())
         print = self._get_print()
+        print(body_html)
+        return
 
         cfg = self.get_base_config(self.report)
         line_length = cfg['line_length']
