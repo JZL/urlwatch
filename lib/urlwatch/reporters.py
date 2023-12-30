@@ -184,10 +184,7 @@ class HtmlReporter(ReporterBase):
             <title>urlwatch</title>
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta name="color-scheme" content="light dark">
-            <meta name="supported-color-schemes" content="light dark only">
             <style type="text/css">
-                :root { color-scheme: light dark; supported-color-schemes: light dark; }
                 body { font-family: sans-serif; }
                 .diff_add { background-color: #abf2bc; display: inline-block; }
                 .diff_sub { background-color: #ffd7d5; display: inline-block; }
@@ -203,16 +200,6 @@ class HtmlReporter(ReporterBase):
                 td, th { padding: 0 0.5em; }
                 td[nowrap] { width: 50%; vertical-align: top; white-space: normal; word-break: break-word; }
                 h2 span.verb { color: #888; }
-                @media (prefers-color-scheme: dark) {
-                    body { background-color: #121212; color: #fff; }
-                    a { color: #8ab5f8; }
-                    a:visited { color: #c58af9; }
-                    td.diff_header, td.diff_next { background-color: #1c1c1c; }
-                    .diff_add { background-color: #1c4329; }
-                    .diff_sub { background-color: #542527; }
-                    .diff_chg { background-color: #907709; }
-                    .unified_nor { color: #ddd; }
-                }
             </style>
         </head><body>
         """)
@@ -421,7 +408,29 @@ class StdoutReporter(TextReporter):
                     print(first, self._blue(second))
             else:
                 print(line)
-
+class StdoutHTMLReporter(TextReporter):
+    """Print summary on stdout (the console)"""
+    __kind__ = "stdoutHTML"
+    def submit(self):
+        filtered_job_states = list(self.report.get_filtered_job_states(self.job_states))
+        subject_args = {
+            "count": len(filtered_job_states),
+            "jobs": ", ".join(
+                job_state.job.pretty_name() for job_state in filtered_job_states
+            ),
+        }
+        subject = self.config["subject"].format(**subject_args)
+        print(
+            "\n".join(
+                ["jonahmail1+qa@gmail.com", subject]
+                + [
+                    " ".join(list(self.convert(HtmlReporter).submit()))
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                ]
+            )
+        )
+        # print('\n'.join(["jonahmail1@gmail.com", "Urlwatch Changed"]+[" ".join(list(super().submit()))]))
 
 class EMailReporter(TextReporter):
     """Send summary via e-mail / SMTP"""
