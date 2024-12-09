@@ -32,6 +32,7 @@ import re
 import os
 import subprocess
 import logging
+# import sys
 
 logger = logging.getLogger(__name__)
 
@@ -107,12 +108,19 @@ def html2text(data, baseurl, method, options):
         else:
             cmd.append('-{}'.format(k))
 
+    # print(cmd, file=sys.stderr)
     logger.debug('Command: %r, stdout encoding: %s', cmd, stdout_encoding)
 
     env = {}
     env.update(os.environ)
     env['LANG'] = 'en_US.utf-8'
     env['LC_ALL'] = 'en_US.utf-8'
+
+    # Need to have standard tmpdir for BASE of lynx (would do file://nix-shell-123
+    # which kept changing and causing diffs). Needs to exist beforehand
+    if not os.path.exists("/tmp/lynxx"):
+        os.makedirs("/tmp/lynxx")
+    env['TMPDIR'] = '/tmp/lynxx'
 
     html2text = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, env=env)
     stdout, stderr = html2text.communicate(data.encode('utf-8'))
