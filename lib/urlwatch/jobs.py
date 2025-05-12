@@ -38,14 +38,15 @@ import textwrap
 from typing import Iterable, Optional, Set, FrozenSet, Sequence
 
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import httpx
+# from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import urlwatch
 
 from .filters import FilterBase
 from .util import TrackSubClasses
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -344,18 +345,29 @@ class UrlJob(Job):
         else:
             timeout = self.timeout
 
-        response = requests.request(url=self.url,
-                                    data=self.data,
-                                    headers=headers,
-                                    method=self.method,
-                                    verify=(not self.ssl_no_verify),
-                                    cookies=self.cookies,
-                                    proxies=proxies,
-                                    timeout=timeout)
+        # response = requests.request(url=self.url,
+        #                             data=self.data,
+        #                             headers=headers,
+        #                             method=self.method,
+        #                             verify=(not self.ssl_no_verify),
+        #                             cookies=self.cookies,
+        #                             proxies=proxies,
+        #                             timeout=timeout, allow_redirects=True)
 
-        response.raise_for_status()
-        if response.status_code == requests.codes.not_modified:
+        # uses http/2 and allows for some to pass cloudflare apparently
+        # no proxies, verify is all
+        response = httpx.request(url=self.url,
+                                 data=self.data,
+                                 headers={k: v for k, v in headers.items() if v is not None},
+                                 method=self.method,
+                                 cookies=self.cookies,
+                                 timeout=timeout,
+                                 follow_redirects=True)
+
+        # httpx was raising on not modified, check that first
+        if response.status_code == httpx.codes.not_modified:
             raise NotModifiedError()
+        response.raise_for_status()
 
         # Save ETag from response into job_state, which will be saved in cache
         job_state.etag = response.headers.get('ETag')
@@ -396,21 +408,21 @@ class UrlJob(Job):
         headers.update(self.headers)
 
     def format_error(self, exception, tb):
-        if isinstance(exception, requests.exceptions.RequestException):
+        if isinstance(exception, httpx.RequestError):
             # Instead of a full traceback, just show the HTTP error
             return str(exception)
         return tb
 
     def ignore_error(self, exception):
-        if isinstance(exception, requests.exceptions.ConnectionError) and self.ignore_connection_errors:
+        if isinstance(exception, httpx.ConnectError) and self.ignore_connection_errors:
             return True
-        if isinstance(exception, requests.exceptions.Timeout) and self.ignore_timeout_errors:
+        if isinstance(exception, httpx.TimeoutException) and self.ignore_timeout_errors:
             return True
-        if isinstance(exception, requests.exceptions.TooManyRedirects) and self.ignore_too_many_redirects:
+        if isinstance(exception, httpx.TooManyRedirects) and self.ignore_too_many_redirects:
             return True
-        if isinstance(exception, requests.exceptions.ChunkedEncodingError) and self.ignore_incomplete_reads:
-            return True
-        elif isinstance(exception, requests.exceptions.HTTPError):
+        # if isinstance(exception, httpx.exceptions.ChunkedEncodingError) and self.ignore_incomplete_reads:
+        #     return True
+        elif isinstance(exception, httpx.HTTPStatusError):
             status_code = exception.response.status_code
             ignored_codes = []
             if isinstance(self.ignore_http_error_codes, int) and self.ignore_http_error_codes == status_code:
